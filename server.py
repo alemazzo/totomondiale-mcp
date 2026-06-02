@@ -6,7 +6,7 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
-from src.client import login, submit_group_bets, submit_prolific_total
+from src.client import submit_group_bets, submit_prolific_total
 from src.client import submit_qualification, submit_special_bets, get_formation
 from src.client import list_players, get_player_formation
 from src.models import MATCHES, TEAMS, PLAYERS
@@ -17,18 +17,6 @@ app = Server("totomondiale-mcp")
 @app.list_tools()
 async def list_tools() -> list[Tool]:
     return [
-        Tool(
-            name="totomondiale_login",
-            description="Log into the Totomondiale website with email and password. Must be called first.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "email": {"type": "string", "description": "Login email"},
-                    "password": {"type": "string", "description": "Login password"},
-                },
-                "required": ["email", "password"],
-            },
-        ),
         Tool(
             name="totomondiale_get_formation",
             description="View your current formation: all group bets, qualifications, special bets, and prolific total.",
@@ -115,10 +103,7 @@ async def list_tools() -> list[Tool]:
 @app.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     try:
-        if name == "totomondiale_login":
-            result = login(arguments["email"], arguments["password"])
-
-        elif name == "totomondiale_get_formation":
+        if name == "totomondiale_get_formation":
             result = get_formation()
 
         elif name == "totomondiale_list_matches":
