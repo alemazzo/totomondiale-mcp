@@ -15,14 +15,9 @@ Aggiungi al tuo file di configurazione opencode un MCP server di tipo "local" co
 - timeout: 30000
 - NON fare override della configurazione esistente: estendila sempre, aggiungendo il server a quelli già presenti
 - Installa il server globalmente, non a livello di progetto
-```
 
-L'agente ti chiederà le credenziali e le configurerà. Una volta installato, l'autenticazione
-avviene automaticamente — non serve chiamare nessun tool di login.
+Il risultato nel file `opencode.json` dovrà essere:
 
-Ecco come apparirà la configurazione in `opencode.json`:
-
-```json
 "mcp": {
   "totomondiale": {
     "type": "local",
