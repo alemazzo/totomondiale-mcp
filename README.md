@@ -13,6 +13,8 @@ Aggiungi al tuo file di configurazione opencode un MCP server di tipo "local" co
 - command: ["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "totomondiale-mcp"]
 - environment: TOTOMONDIALE_EMAIL e TOTOMONDIALE_PASSWORD (chiedile all'utente)
 - timeout: 30000
+- NON fare override della configurazione esistente: estendila sempre, aggiungendo il server a quelli già presenti
+- Installa il server globalmente, non a livello di progetto
 ```
 
 L'agente ti chiederà le credenziali e le configurerà. Una volta installato, l'autenticazione
