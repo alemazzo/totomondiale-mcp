@@ -14,3 +14,7 @@ dependencies = [
 
 [project.scripts]
 totomondiale-mcp = "server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+force-include = { "server.py" = "server.py" }
