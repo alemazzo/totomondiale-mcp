@@ -1,0 +1,11 @@
+[project]
+name = "totomondiale-mcp"
+version = "0.1.0"
+description = "MCP server for Totomondiale 2026 predictions — allows AI agents to submit bets programmatically"
+[project.scripts]
+totomondiale-mcp = "server:main"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=1.27.2",
+    "requests>=2.34.2",
+]
