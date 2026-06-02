@@ -19,13 +19,11 @@ uv sync
   "mcpServers": {
     "totomondiale": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/USER/totomondiale-mcp", "python", "server.py"]
+      "args": ["--from", "git+https://github.com/alemazzo/totomondiale-mcp", "python", "server.py"]
     }
   }
 }
 ```
-
-Sostituisci `USER` con il tuo username GitHub.
 
 ## Tool disponibili
 
