@@ -9,11 +9,29 @@ Permette di leggere la propria formazione, vedere la classifica, consultare le s
 Copia e incolla questo prompt nel tuo AI agent:
 
 ```
-aggiungi l'mcp totomondiale da git+https://github.com/alemazzo/totomondiale-mcp.
-chiedi all'utente email e password di totomondiale e configurale come env TOTOMONDIALE_EMAIL e TOTOMONDIALE_PASSWORD.
+Aggiungi un MCP server chiamato "totomondiale" di tipo "local" con comando:
+["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "python", "server.py"]
+
+Chiedi all'utente email e password del suo account Totomondiale e impostale
+nell'oggetto "environment" come TOTOMONDIALE_EMAIL e TOTOMONDIALE_PASSWORD.
+
+Esempio del risultato atteso:
+{
+  "mcpServers": {
+    "totomondiale": {
+      "type": "local",
+      "command": ["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "python", "server.py"],
+      "environment": {
+        "TOTOMONDIALE_EMAIL": "<email>",
+        "TOTOMONDIALE_PASSWORD": "<password>"
+      }
+    }
+  }
+}
 ```
 
-L'agente configurerà l'MCP con le tue credenziali.
+L'agente configurerà l'MCP automaticamente. Una volta installato, l'autenticazione
+avviene in background — non serve chiamare nessun tool di login.
 
 ## Tool disponibili
 
