@@ -14,33 +14,18 @@ uv sync
 
 ## Configurazione MCP
 
-Aggiungi al tuo `opencode.json` (o `~/.config/opencode/opencode.json`):
-
-```json
-{
-  "mcp": {
-    "totomondiale": {
-      "type": "local",
-      "command": ["uv", "run", "--directory", "/path/to/totomondiale-mcp", "python", "server.py"],
-      "enabled": true,
-      "timeout": 30000
-    }
-  }
-}
-```
-
-Per Claude Desktop, aggiungi a `claude_desktop_config.json`:
-
 ```json
 {
   "mcpServers": {
     "totomondiale": {
-      "command": "uv",
-      "args": ["run", "--directory", "/path/to/totomondiale-mcp", "python", "server.py"]
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/USER/totomondiale-mcp", "python", "server.py"]
     }
   }
 }
 ```
+
+Sostituisci `USER` con il tuo username GitHub.
 
 ## Tool disponibili
 
