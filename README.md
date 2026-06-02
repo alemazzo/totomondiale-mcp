@@ -9,29 +9,24 @@ Permette di leggere la propria formazione, vedere la classifica, consultare le s
 Copia e incolla questo prompt nel tuo AI agent:
 
 ```
-Aggiungi un MCP server chiamato "totomondiale" di tipo "local" con comando:
-["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "python", "server.py"]
+Aggiungi un MCP server al file opencode.json (o ~/.config/opencode/opencode.json) sotto la chiave "mcp" con queste impostazioni:
 
-Chiedi all'utente email e password del suo account Totomondiale e impostale
-nell'oggetto "environment" come TOTOMONDIALE_EMAIL e TOTOMONDIALE_PASSWORD.
-
-Esempio del risultato atteso:
-{
-  "mcpServers": {
-    "totomondiale": {
-      "type": "local",
-      "command": ["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "python", "server.py"],
-      "environment": {
-        "TOTOMONDIALE_EMAIL": "<email>",
-        "TOTOMONDIALE_PASSWORD": "<password>"
-      }
-    }
+"totomondiale": {
+  "type": "local",
+  "command": ["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "python", "server.py"],
+  "enabled": true,
+  "timeout": 30000,
+  "environment": {
+    "TOTOMONDIALE_EMAIL": "<email>",
+    "TOTOMONDIALE_PASSWORD": "<password>"
   }
 }
+
+Chiedi all'utente email e password del suo account Totomondiale e sostituiscile in <email> e <password>.
 ```
 
-L'agente configurerà l'MCP automaticamente. Una volta installato, l'autenticazione
-avviene in background — non serve chiamare nessun tool di login.
+L'agente ti chiederà le credenziali e le configurerà. Una volta installato, l'autenticazione
+avviene automaticamente — non serve chiamare nessun tool di login.
 
 ## Tool disponibili
 
