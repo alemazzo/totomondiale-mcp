@@ -20,6 +20,25 @@ Aggiungi al tuo file di configurazione opencode un MCP server di tipo "local" co
 L'agente ti chiederà le credenziali e le configurerà. Una volta installato, l'autenticazione
 avviene automaticamente — non serve chiamare nessun tool di login.
 
+Ecco come apparirà la configurazione in `opencode.json`:
+
+```json
+"mcp": {
+  "totomondiale": {
+    "type": "local",
+    "command": ["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "totomondiale-mcp"],
+    "enabled": true,
+    "environment": {
+      "TOTOMONDIALE_EMAIL": "la-tua-email@example.com",
+      "TOTOMONDIALE_PASSWORD": "password"
+    }
+  }
+},
+"experimental": {
+  "mcp_timeout": 30000
+}
+```
+
 ## Tool disponibili
 
 | Tool | Descrizione |
