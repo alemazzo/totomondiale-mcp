@@ -1,4 +1,5 @@
 """Totomondiale HTTP client: login, fetch, submit all bet types."""
+import os
 import re
 from typing import Union
 import requests
@@ -6,6 +7,7 @@ from src.models import MATCHES, TEAMS, PLAYERS, TEAM_BY_ID, PLAYER_BY_ID, QUALIF
 
 BASE_URL = "https://totomondiale.altervista.org"
 SESSION = requests.Session()
+_logged_in = False
 
 
 def _get_csrf_token(html: str) -> str:
@@ -19,7 +21,9 @@ def _get_fresh_csrf() -> str:
 
 
 def login(email: str, password: str) -> dict:
+    global _logged_in
     SESSION.cookies.clear()
+    _logged_in = False
     r = SESSION.get(f"{BASE_URL}/index_scommesse.php", allow_redirects=True)
     csrf = _get_csrf_token(r.text)
     if not csrf:
@@ -30,11 +34,26 @@ def login(email: str, password: str) -> dict:
         allow_redirects=True,
     )
     if "wizard_scommesse.php" in r.url or "logout-btn" in r.text or "Benvenuto" in r.text:
+        _logged_in = True
         return {"success": True, "message": "Login OK"}
     return {"success": False, "error": "Login failed — check credentials"}
 
 
+def ensure_auth() -> dict:
+    global _logged_in
+    if _logged_in:
+        return {"success": True}
+    email = os.environ.get("TOTOMONDIALE_EMAIL")
+    password = os.environ.get("TOTOMONDIALE_PASSWORD")
+    if not email or not password:
+        return {"success": False, "error": "Not logged in. Set TOTOMONDIALE_EMAIL and TOTOMONDIALE_PASSWORD env vars, or call login first."}
+    return login(email, password)
+
+
 def _post(data: Union[dict, list]) -> dict:
+    auth = ensure_auth()
+    if not auth["success"]:
+        return auth
     csrf = _get_fresh_csrf()
     if isinstance(data, dict):
         data["csrf_token"] = csrf
@@ -111,6 +130,9 @@ def submit_special_bets(winner: str, capocannoniere_key: str) -> dict:
 
 
 def get_formation() -> dict:
+    auth = ensure_auth()
+    if not auth["success"]:
+        return auth
     f = {"group_bets": {}, "qualifications": {}, "special_bets": {}, "prolific_total": None}
 
     for g in MATCHES:
@@ -156,6 +178,9 @@ def get_formation() -> dict:
 
 
 def list_players() -> list[dict]:
+    auth = ensure_auth()
+    if not auth["success"]:
+        return auth
     r = SESSION.get(f"{BASE_URL}/index_classifica.php")
     rows = re.findall(
         r"<tr[^>]*>\s*<td>(\d+°)</td>\s*<td><a href='index_schedine_utente\.php\?user=([^']+)'[^>]*>([^<]+)</a></td>\s*<td>(\d+)</td>",
@@ -168,6 +193,9 @@ def list_players() -> list[dict]:
 
 
 def get_player_formation(username: str) -> dict:
+    auth = ensure_auth()
+    if not auth["success"]:
+        return auth
     r = SESSION.get(f"{BASE_URL}/index_schedine_utente.php?user={username}")
 
     f: dict = {"username": username, "group_bets": {}, "qualifications": {}, "special_bets": {}}

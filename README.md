@@ -7,29 +7,47 @@ Permette di leggere la propria formazione, vedere la classifica, consultare le s
 ## Installazione
 
 ```bash
-git clone <repo-url>
+git clone git@github.com:alemazzo/totomondiale-mcp.git
 cd totomondiale-mcp
 uv sync
 ```
 
 ## Configurazione MCP
 
+### Opzione 1: Prompt per LLM
+
+Copia e incolla nel tuo AI agent:
+
+```
+aggiungi l'mcp totomondiale da git+https://github.com/alemazzo/totomondiale-mcp
+con env TOTOMONDIALE_EMAIL=mcp-test@gmail.com e TOTOMONDIALE_PASSWORD=password
+```
+
+### Opzione 2: Config manuale
+
+Aggiungi le credenziali via env — il modello non le vedrà mai:
+
 ```json
 {
   "mcpServers": {
     "totomondiale": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/alemazzo/totomondiale-mcp", "python", "server.py"]
+      "args": ["--from", "git+https://github.com/alemazzo/totomondiale-mcp", "python", "server.py"],
+      "env": {
+        "TOTOMONDIALE_EMAIL": "mcp-test@gmail.com",
+        "TOTOMONDIALE_PASSWORD": "password"
+      }
     }
   }
 }
 ```
 
+L'MCP fa auto-login al primo tool chiamato. Nessuna necessità di passare credenziali al modello.
+
 ## Tool disponibili
 
 | Tool | Descrizione |
 |------|-------------|
-| `totomondiale_login` | Autenticazione (email + password) |
 | `totomondiale_get_formation` | Leggi la tua formazione completa |
 | `totomondiale_list_matches` | Elenca match ID per ogni girone |
 | `totomondiale_list_teams` | Elenca tutte le squadre con ID |
@@ -40,11 +58,11 @@ uv sync
 | `totomondiale_submit_special_bets` | Invia vincitore e capocannoniere |
 | `totomondiale_submit_prolific_total` | Invia la partita più prolifica del torneo (Pt) |
 
+Il tool `totomondiale_login` è disponibile come fallback se non vuoi usare le env vars.
+
 ## Esempi
 
 ```
-> fai il login su totomondiale con mcp-test@gmail.com
-
 > qual è la mia formazione?
 
 > invia i pronostici per il girone A: 2-1, 1-1, 3-0, 0-2, 1-0, 2-2 con prolifico match 2
@@ -57,10 +75,8 @@ uv sync
 ## Test
 
 ```bash
-uv run python -m tests.test_client
+TOTOMONDIALE_EMAIL=mcp-test@gmail.com TOTOMONDIALE_PASSWORD=password uv run python -m tests.test_client
 ```
-
-I test usano le credenziali `mcp-test@gmail.com` / `password` definite in `tests/test_client.py`.
 
 ## Struttura
 
@@ -68,7 +84,7 @@ I test usano le credenziali `mcp-test@gmail.com` / `password` definite in `tests
 totomondiale-mcp/
 ├── server.py          # MCP server entry point
 ├── src/
-│   ├── client.py      # HTTP client: login, submit, read
+│   ├── client.py      # HTTP client: login, submit, read (auto-auth via env)
 │   └── models.py      # Data: matches, teams, players
 ├── tests/
 │   └── test_client.py # 20 test end-to-end
