@@ -9,20 +9,10 @@ Permette di leggere la propria formazione, vedere la classifica, consultare le s
 Copia e incolla questo prompt nel tuo AI agent:
 
 ```
-Aggiungi un MCP server al file opencode.json (o ~/.config/opencode/opencode.json) sotto la chiave "mcp" con queste impostazioni:
-
-"totomondiale": {
-  "type": "local",
-  "command": ["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "totomondiale-mcp"],
-  "enabled": true,
-  "timeout": 30000,
-  "environment": {
-    "TOTOMONDIALE_EMAIL": "<email>",
-    "TOTOMONDIALE_PASSWORD": "<password>"
-  }
-}
-
-Chiedi all'utente email e password del suo account Totomondiale e sostituiscile in <email> e <password>.
+Aggiungi al tuo file di configurazione opencode un MCP server di tipo "local" con:
+- command: ["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "totomondiale-mcp"]
+- environment: TOTOMONDIALE_EMAIL e TOTOMONDIALE_PASSWORD (chiedile all'utente)
+- timeout: 30000
 ```
 
 L'agente ti chiederà le credenziali e le configurerà. Una volta installato, l'autenticazione
