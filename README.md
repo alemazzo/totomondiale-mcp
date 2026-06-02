@@ -13,7 +13,7 @@ Aggiungi un MCP server al file opencode.json (o ~/.config/opencode/opencode.json
 
 "totomondiale": {
   "type": "local",
-  "command": ["uv", "run", "--directory", "/path/to/totomondiale-mcp", "python", "server.py"],
+  "command": ["uvx", "--from", "git+https://github.com/alemazzo/totomondiale-mcp", "totomondiale-mcp"],
   "enabled": true,
   "timeout": 30000,
   "environment": {
