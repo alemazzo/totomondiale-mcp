@@ -264,10 +264,43 @@ def _scrape_special_bets() -> dict:
     return bets
 
 
-def _scrape_prolific_total() -> dict | None:
-    """Try to scrape the tournament-wide prolific total match (Pt).
-    Tries multiple possible URL patterns.
+def _scrape_prolific_total(username: str | None = None) -> dict | None:
+    """Scrape the tournament-wide prolific total match (Pt).
+    Strategy: scrape from own schedina page (reliable), fallback to wizard URLs.
     """
+    # ── Primary: scrape Pt from own schedina page (shows pt-box indicator) ──
+    if username:
+        try:
+            r = SESSION.get(
+                f"{BASE_URL}/index_schedine_utente.php?user={username}", timeout=TIMEOUT
+            )
+            html = r.text
+            for g in MATCHES:
+                panel_m = re.search(rf'<div\s+class="group-panel"\s+data-group="{g}"', html)
+                if not panel_m:
+                    continue
+                next_panel = re.search(
+                    r'<div\s+class="group-panel"\s+data-group="', html[panel_m.start() + 1:]
+                )
+                section_end = panel_m.start() + 1 + next_panel.start() if next_panel else len(html)
+                section = html[panel_m.start():section_end]
+
+                if "pt-box" not in section:
+                    continue
+
+                tables = re.split(r'<table class="mcm-table[^"]*">', section)[1:]
+                for match_idx, table_html in enumerate(tables):
+                    table_end = table_html.find("</table>")
+                    if table_end > 0:
+                        table_html = table_html[:table_end]
+                    if "pt-box" in table_html:
+                        match_id = MATCHES[g][match_idx] if match_idx < len(MATCHES[g]) else None
+                        if match_id:
+                            return {"group": g, "match_index": match_idx, "match_id": match_id}
+        except Exception:
+            pass
+
+    # ── Fallback: try wizard edit pages directly ──
     urls_to_try = [
         f"{BASE_URL}/wizard_scommesse.php?prolifico=1&edit=1",
         f"{BASE_URL}/wizard_scommesse.php?pt=1&edit=1",
@@ -326,7 +359,7 @@ def get_formation() -> dict:
 
     # 4) Prolific total (Pt) — best-effort, may not be retrievable
     try:
-        pt = _scrape_prolific_total()
+        pt = _scrape_prolific_total(username)
         if pt:
             f["prolific_total"] = pt
     except Exception:

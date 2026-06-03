@@ -225,6 +225,30 @@ def test_prolific_total_submit():
     assert_true(result["success"], f"Prolific total submit failed: {result}")
 
 
+def test_prolific_total_submit_and_verify():
+    """Submit Pt to a known match, verify get_formation returns it correctly."""
+    # Save original Pt
+    orig_f = get_formation()
+    orig_pt = orig_f.get("prolific_total")
+
+    result = submit_prolific_total("H", 0)
+    assert_true(result["success"], f"Pt submit failed: {result}")
+    time.sleep(0.5)
+
+    after = get_formation()
+    pt = after.get("prolific_total")
+    if pt is None:
+        raise AssertionError("get_formation did not return prolific_total after submit")
+    assert_eq(pt["group"], "H", f"Expected group H, got {pt['group']}")
+    assert_eq(pt["match_index"], 0, f"Expected match_index 0, got {pt['match_index']}")
+    assert_eq(pt["match_id"], 537369, f"Expected match_id 537369, got {pt['match_id']}")
+    print(f"      (Pt verified: {pt['group']}[{pt['match_index']}] = {pt['match_id']})")
+
+    # Restore original Pt
+    if orig_pt and orig_pt.get("group"):
+        submit_prolific_total(orig_pt["group"], orig_pt["match_index"])
+
+
 # ============================================================
 # Player tools
 # ============================================================
@@ -297,6 +321,7 @@ def main():
         ]),
         ("Prolific total", [
             ("Submit works", test_prolific_total_submit),
+            ("Submit + verify Pt retrieval", test_prolific_total_submit_and_verify),
         ]),
         ("Player tools", [
             ("List players returns data", test_list_players),
