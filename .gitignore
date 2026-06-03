@@ -1,4 +1,4 @@
-# Python-generated files
+.sisyphus/
 __pycache__/
 *.py[oc]
 build/
