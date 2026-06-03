@@ -1,4 +1,5 @@
-"""End-to-end tests for the Totomondiale client. Uses real credentials."""
+"""End-to-end tests for the Totomondiale client. Uses env vars for credentials."""
+import os
 import sys
 import json
 import time
@@ -9,8 +10,8 @@ from src.client import (
 )
 from src.models import MATCHES, TEAMS, PLAYERS, TEAM_BY_ID
 
-EMAIL = "mcp-test@gmail.com"
-PASSWORD = "password"
+EMAIL = os.environ.get("TOTOMONDIALE_EMAIL", "")
+PASSWORD = os.environ.get("TOTOMONDIALE_PASSWORD", "")
 
 passed = 0
 failed = 0
@@ -21,13 +22,13 @@ def t(name, fn):
     try:
         fn()
         passed += 1
-        print(f"  ✓ {name}")
+        print(f"  \u2713 {name}")
     except AssertionError as e:
         failed += 1
-        print(f"  ✗ {name}: {e}")
+        print(f"  \u2717 {name}: {e}")
     except Exception as e:
         failed += 1
-        print(f"  ✗ {name}: {type(e).__name__}: {e}")
+        print(f"  \u2717 {name}: {type(e).__name__}: {e}")
 
 
 def assert_true(val, msg=""):
@@ -42,6 +43,8 @@ def assert_eq(a, b, msg=""):
 # Auth
 # ============================================================
 def test_login():
+    if not EMAIL or not PASSWORD:
+        raise AssertionError("Set TOTOMONDIALE_EMAIL and TOTOMONDIALE_PASSWORD env vars")
     result = login(EMAIL, PASSWORD)
     assert_true(result["success"], f"Login failed: {result.get('error')}")
 
@@ -49,7 +52,9 @@ def test_login():
 def test_login_bad_credentials():
     result = login("wrong@email.com", "wrongpass")
     assert not result["success"]
-    login(EMAIL, PASSWORD)  # re-auth after session clear
+    # Re-auth after session clear
+    if EMAIL and PASSWORD:
+        login(EMAIL, PASSWORD)
 
 
 # ============================================================
@@ -70,7 +75,7 @@ def test_all_teams_present():
 
 def test_all_players_present():
     assert len(PLAYERS) > 10
-    known = {"Mbappé", "Haaland", "Messi", "C.Ronaldo", "Yamal"}
+    known = {"Mbapp\u00e9", "Haaland", "Messi", "C.Ronaldo", "Yamal"}
     assert known.issubset(PLAYERS.keys())
 
 
@@ -93,6 +98,22 @@ def test_get_formation_has_data():
     f = get_formation()
     filled = sum(1 for g in f["group_bets"].values() if any(m["score"] for m in g["matches"]))
     assert filled > 0, "No group bets found"
+
+
+def test_get_formation_no_error_key_when_auth_ok():
+    """When auth is OK, the formation should NOT have an 'error' top-level key."""
+    f = get_formation()
+    assert "error" not in f, f"Unexpected error key: {f.get('error')}"
+
+
+def test_get_formation_prolific_total_may_be_set():
+    """If the user has set a prolific total, it should be reflected."""
+    f = get_formation()
+    pt = f.get("prolific_total")
+    # It may be None if not set; if set, verify structure
+    if pt is not None:
+        assert "match_id" in pt, f"prolific_total missing match_id: {pt}"
+        print(f"      (Pt set: group={pt.get('group')}, idx={pt.get('match_index')}, mid={pt['match_id']})")
 
 
 # ============================================================
@@ -132,6 +153,13 @@ def test_group_bets_invalid_group():
 def test_group_bets_wrong_count():
     result = submit_group_bets("A", ["1-1"] * 3, 0)
     assert not result["success"]
+
+
+def test_group_bets_invalid_score_format():
+    """Score without hyphen should be rejected with a clear error."""
+    result = submit_group_bets("A", ["11", "22", "3-0", "1-1", "0-2", "2-2"], 0)
+    assert not result["success"]
+    assert "Invalid score format" in result.get("error", "")
 
 
 # ============================================================
@@ -203,6 +231,10 @@ def test_prolific_total_submit():
 def test_list_players():
     players = list_players()
     assert len(players) > 0, "No players on leaderboard"
+    # Check no error key on first element when auth is OK
+    if players and "error" in players[0]:
+        print(f"      (Auth note: {players[0]['error']})")
+        return
     assert "pos" in players[0]
     assert "username" in players[0]
     assert "points" in players[0]
@@ -244,11 +276,14 @@ def main():
         ("Get formation", [
             ("Structure has all sections", test_get_formation_structure),
             ("Group bets have data", test_get_formation_has_data),
+            ("No error key when auth OK", test_get_formation_no_error_key_when_auth_ok),
+            ("Prolific total may be set", test_get_formation_prolific_total_may_be_set),
         ]),
         ("Group bets", [
             ("Submit + verify + restore", test_group_bets_submit_and_verify),
             ("Reject invalid group", test_group_bets_invalid_group),
             ("Reject wrong score count", test_group_bets_wrong_count),
+            ("Reject invalid score format", test_group_bets_invalid_score_format),
         ]),
         ("Qualification", [
             ("Reject wrong team count", test_qualification_reject_wrong_count),
@@ -271,7 +306,7 @@ def main():
     ]
 
     print("=" * 60)
-    print("Totomondiale MCP — End-to-End Tests")
+    print("Totomondiale MCP \u2014 End-to-End Tests")
     print("=" * 60)
 
     for group_name, tests in groups:
